@@ -1,0 +1,10 @@
+.gcloudignore
+.env
+/bin
+/lib
+__pycache__/
+pyvenv.cfg
+app.yaml
+badge_names.csv
+credentials.json
+token.json
