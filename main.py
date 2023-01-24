@@ -52,6 +52,11 @@ async def on_message(message):
     
     # check if any message is directed at the bot by name
     if client.user.mentioned_in(message):
+        # Assign the message id to a variable
+        messageid = await message.channel.fetch_message(message.id)
+        # Print entire message from author to console
+        print(f"{message.author}: {message.content}")
+        
         # Get the author of the message
         author = message.author
         # Extract the user's input after the bot's mention
@@ -69,27 +74,53 @@ async def on_message(message):
         mt_now_day = mt_now_time[:10]
 
         # check if the message after the botname matches the following regex: [0-9]{6} (in|out) 'now'
-        if re.match(r"(in|out) now", user_input):
+        if re.match(r".*(in|out).*now.*", user_input):
+            # React with eyes emoji to the message author
+            await message.add_reaction('👀')
             # get the badge_id from badge_names dictionary based on the discord id in message.author.id
             badge_id = badge_names.get(str(message.author.id))
-            # Create a new dictionary with the key of badge_id
+            # Create a dictionary with the badge_id as the key
             badge_id_dict = {badge_id: {}}
+            # If the badge_id key in badge_id_dict is None react with ID emoji to the message author
+            if badge_id == None:
+                await message.add_reaction('🆔')
+                return
             # Extract the in or out and store it in the badge_id_dict dictionary
             badge_id_dict[badge_id]['inout'] = re.search(r"(in|out)", user_input).group(0)
             # Store mt_time in the badge_id_dict dictionary
             badge_id_dict[badge_id]['time'] = mt_now_time
+            # if any of the values in the badge_id_dict dictionary are None react with failure emoji to the message author
+            if None in badge_id_dict[badge_id].values():
+                await message.add_reaction('❌')
+                # Print a console message that the badge_id_dict dictionary has a None value
+                print(f"None value in badge_id_dict dictionary: {badge_id_dict}")
+                return
             # send badge_data to <./cliWrite2sheets.py student_id in_or_out "time"> to update the attendance sheet
             os.system(f"python3 cliWrite2sheets.py {badge_id} {badge_id_dict[badge_id]['inout']} \"{badge_id_dict[badge_id]['time']}\"")
-            # Provie the user with a confirmation message
-            await message.channel.send(f"Thanks {author.mention}! I've submitted:\n{badge_id} {badge_id_dict[badge_id]['inout']} {badge_id_dict[badge_id]['time']}.")
+            # React with a thumbs up emoji to the message author
+            await message.add_reaction('👍')
+            
             # Delete the badge_id_dict dictionary
             del badge_id_dict
             # Delete the badge_id variable
             badge_id = ''
 
-        if re.match(r"(in|out) (1[0-2]|0?[1-9]):[0-5][0-9] ?(am|pm)", user_input):
+        # Use regular expression to check if the message contains (in|out) and 12 hour time but does NOT contain (am|pm)
+        if re.match(r'.*(in|out).*(1[0-2]|0?[1-9]):[0-5][0-9]([ ]+|at)?(?!\s*(am|pm))', user_input):
+            await message.add_reaction('❌')
+
+        # check if the message after the botname matches the following regex: [0-9]{6} (in|out) [0-9]{1,2}:[0-5][0-9] (am|pm)
+        if re.match(r".*(in|out).*(1[0-2]|0?[1-9]):[0-5][0-9].*(am|pm).*", user_input):
+            # React with eyes emoji to the message author
+            await message.add_reaction('👀')
+            # get the badge_id from badge_names dictionary based on the discord id in message.author.id
             badge_id = badge_names.get(str(message.author.id))
+            # Create a dictionary with the badge_id as the key
             badge_id_dict = {badge_id: {}}
+            # If the badge_id key in badge_id_dict is None react with ID emoji to the message author
+            if badge_id == None:
+                await message.add_reaction('🆔')
+                return
             # Extract the in or out and store it in the badge_id_dict dictionary
             badge_id_dict[badge_id]['inout'] = re.search(r"(in|out)", user_input).group(0)
             # Extract the time and store it in the badge_id_dict dictionary
@@ -106,13 +137,21 @@ async def on_message(message):
             # Write the date_formatted to the badge_id_dict dictionary
             badge_id_dict[badge_id]["time"] = date_formatted
 
+            # if any of the values in the badge_id_dict dictionary are None react with failure emoji to the message author
+            if None in badge_id_dict[badge_id].values():
+                await message.add_reaction('❌')
+                # Print a console message that the badge_id_dict dictionary has a None value
+                print(f"None value in badge_id_dict dictionary: {badge_id_dict}")
+                return
             # send badge_data to <./cliWrite2sheets.py student_id in_or_out "time"> to update the attendance sheet
             os.system(f"python3 cliWrite2sheets.py {badge_id} {badge_id_dict[badge_id]['inout']} \"{date_formatted}\"")
-            # Provie the user with a confirmation message
-            await message.channel.send(f"Thanks {author.mention}! I've submitted:\n{badge_id} {badge_id_dict[badge_id]['inout']} {date_formatted}.")
+            # If os.system call is successful react with a thumbs up emoji to the message author
+            await message.add_reaction('👍')
+
             # Delete the badge_id_dict dictionary
             del badge_id_dict
             # Reset the badge_id variable
             badge_id = ''
+
 # Start the bot
 client.run(TOKEN)
