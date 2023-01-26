@@ -7,12 +7,18 @@ from dotenv import load_dotenv
 import os
 import pytz
 import re
+## OAUTH2 METHOD
+from discordoauth2 import get_token
+access_token = get_token()
+
 import google.auth
 
 # Load the Discord token from the .env file
 load_dotenv()
+
 # Set the DISCORD_TOKEN variable from the token in the .env file
-TOKEN = os.getenv('DISCORD_TOKEN')
+## TOKEN METHOD COMMENTED OUT WHILE TESTING OAUTH2 METHOD
+# TOKEN = os.getenv('DISCORD_TOKEN')
 
 # Set the timezone to Denver
 mtz = pytz.timezone('America/Denver')
@@ -154,4 +160,8 @@ async def on_message(message):
             badge_id = ''
 
 # Start the bot
-client.run(TOKEN)
+## TOKEN METHOD COMMENTED OUT WHILE TESTING OAUTH2 METHOD
+# client.run(TOKEN)
+
+## OAUTH2 METHOD
+client.run(access_token)
