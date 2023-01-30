@@ -7,18 +7,23 @@ from dotenv import load_dotenv
 import os
 import pytz
 import re
-## OAUTH2 METHOD
-from discordoauth2 import get_token
-access_token = get_token()
 
-import google.auth
+# import logging
+# import logging.handlers
+# logger = logging.getLogger('discord')
+# logger.setLevel(logging.DEBUG)
+# logging.getLogger('discord.http').setLevel(logging.INFO)
+# handler = logging.StreamHandler()
+# dt_fmt = '%Y-%m-%d %H:%M:%S'
+# formatter = logging.Formatter('[{asctime}] [{levelname:<8}] {name}: {message}', dt_fmt, style='{')
+# handler.setFormatter(formatter)
+# logger.addHandler(handler)
 
 # Load the Discord token from the .env file
 load_dotenv()
 
 # Set the DISCORD_TOKEN variable from the token in the .env file
-## TOKEN METHOD COMMENTED OUT WHILE TESTING OAUTH2 METHOD
-# TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv('DISCORD_TOKEN')
 
 # Set the timezone to Denver
 mtz = pytz.timezone('America/Denver')
@@ -56,12 +61,13 @@ async def on_message(message):
         # Send a message to the channel with instructions on how to check in or out
         await message.channel.send(f"I can update today's attendance sheet!\nPlease @mention me with your id like this:\n\n@awSheet out 6:30pm\nor this:\n@awSheet out now")
     
-    # check if any message is directed at the bot by name
-    if client.user.mentioned_in(message):
+    ## Todo: Update this to check for the bot's identically named role instead of _just_ the bot's name.
+    # check if any message is directed at the bot by name.
+    if client.user.mentioned_in(message): 
         # Assign the message id to a variable
         messageid = await message.channel.fetch_message(message.id)
         # Print entire message from author to console
-        print(f"{message.author}: {message.content}")
+        #print(f"{message.author}: {message.content}")
         
         # Get the author of the message
         author = message.author
@@ -87,6 +93,9 @@ async def on_message(message):
             badge_id = badge_names.get(str(message.author.id))
             # Create a dictionary with the badge_id as the key
             badge_id_dict = {badge_id: {}}
+
+            # Print the badge_id_dict dictionary to the console
+            print(f"badge_id_dict: {badge_id_dict}")
             # If the badge_id key in badge_id_dict is None react with ID emoji to the message author
             if badge_id == None:
                 await message.add_reaction('🆔')
@@ -123,6 +132,8 @@ async def on_message(message):
             badge_id = badge_names.get(str(message.author.id))
             # Create a dictionary with the badge_id as the key
             badge_id_dict = {badge_id: {}}
+            # Print the badge_id_dict dictionary to the console
+            print(f"badge_id_dict: {badge_id_dict}")
             # If the badge_id key in badge_id_dict is None react with ID emoji to the message author
             if badge_id == None:
                 await message.add_reaction('🆔')
@@ -160,8 +171,5 @@ async def on_message(message):
             badge_id = ''
 
 # Start the bot
-## TOKEN METHOD COMMENTED OUT WHILE TESTING OAUTH2 METHOD
-# client.run(TOKEN)
-
-## OAUTH2 METHOD
-client.run(access_token)
+#client.run(TOKEN, log_handler=None)
+client.run(TOKEN)
